@@ -1,18 +1,170 @@
-/*
- * Create a list that holds all of your cards
- */
+// List of cards
+let cards = ["fa-diamond", "fa-diamond", "fa-paper-plane-o", "fa-paper-plane-o", "fa-anchor", "fa-anchor",
+    "fa-bolt", "fa-bolt", "fa-cube", "fa-cube", "fa-leaf", "fa-leaf",
+    "fa-bicycle", "fa-bicycle", "fa-bomb", "fa-bomb"];
+
+// Game State Variables
+let openCards = [];
+let matchedCards = 0;
+let moveCounter = "";
+let numStars = 3;
+let timer = {
+    seconds: 0,
+    minutes: 0,
+    clearTime: -1
+};
 
 
-/*
- * Display the cards on the page
- *   - shuffle the list of cards using the provided "shuffle" method below
- *   - loop through each card and create its HTML
- *   - add each card's HTML to the page
- */
+// stars rating
+const hard = 15;
+const medium = 20;
 
-// Shuffle function from http://stackoverflow.com/a/2450976
+// Model Popup for results
+const modal = $("#win-modal");
+
+// Timer functions
+const startTimer = function () {
+    if (timer.seconds === 59) {
+        timer.minutes++;
+        timer.seconds = 0;
+    } else {
+        timer.seconds++;
+    }
+    var time = String(timer.minutes) + ":" + timer.seconds;
+    $(".timer").text(time);
+};
+// Resets timer state and restarts timer
+function resetTimer() {
+    clearInterval(timer.clearTime);
+    timer.seconds = 0;
+    timer.minutes = 0;
+    $(".timer").text("0:00");
+    timer.clearTime = setInterval(startTimer, 1000);
+}
+//Check if card is not matched or open state
+function isValidCard(card) {
+    return !(card.hasClass("open") || card.hasClass("match"));
+}
+// Returns win condition
+function hasWon() {
+    if (matchedCards === 16) {
+        return true;
+    } else {
+        return false;
+    }
+}
+// Sets currently open cards to the match state, checks win condition
+const setMatch = function () {
+    openCards.forEach(function (card) {
+        card.addClass("match");
+    });
+    openCards = [];
+    matchedCards += 2;
+
+    if (hasWon()) {
+        clearInterval(timer.clearTime);
+        showModal();
+    }
+};
+
+// Sets currently open cards back to default state
+const resetOpen = function () {
+    openCards.forEach(function (card) {
+        card.toggleClass("open");
+        card.toggleClass("show");
+    });
+    openCards = [];
+};
+
+// Sets selected card to the open and shown state
+function openCard(card) {
+    if (!card.hasClass("open")) {
+        card.addClass("open");
+        card.addClass("show");
+        openCards.push(card);
+    }
+}
+// Model after winning
+function showModal() {
+    modal.css("display", "block");
+}
+// Randomise cards Every time its loading
+function updateCards() {
+    cards = shuffle(cards);
+    var index = 0;
+    $.each($(".card i"), function () {
+        $(this).attr("class", "fa " + cards[index]);
+        index++;
+    });
+    resetTimer();
+}
+// Removes last start from remaining stars, updates modal HTML
+function removeStar() {
+    $(".fa-star").last().attr("class", "fa fa-star-o");
+    numStars--;
+    $(".num-stars").text(String(numStars));
+}
+// Restores star icons to 3 stars, updates modal HTML
+function resetStars() {
+    $(".fa-star-o").attr("class", "fa fa-star");
+    numStars = 3;
+    $(".num-stars").text(String(numStars));
+}
+// Updates number of moves in the HTML, removes star is necessary based on difficulty variables
+function updateMoveCounter() {
+    $(".moves").text(moveCounter);
+    if (moveCounter === hard || moveCounter === medium) {
+        removeStar();
+    }
+}
+// Resets all game state variables and resets all required HTML to default state
+const resetGame = function () {
+    openCards = [];
+    matchedCards = 0;
+    moveCounter = 0;
+    resetTimer();
+    updateMoveCounter();
+    $(".card").attr("class", "card");
+    updateCards();
+    resetStars();
+};
+// Resets game state and toggles win modal display off
+const playAgain = function() {
+    resetGame();
+    modal.css("display", "none");
+};
+// Returns whether or not currently open cards match
+function checkMatch() {
+    if (openCards[0].children().attr("class")===openCards[1].children().attr("class")) {
+        return true;
+    } else {
+        return false;
+    }
+}
+// On click function
+const onClick = function () {
+    if (isValidCard($(this))) {
+        if (openCards.length === 0) {
+            openCard($(this));
+
+        } else if (openCards.length === 1) {
+            openCard($(this));
+            moveCounter++;
+            updateMoveCounter();
+
+            if (checkMatch()) {
+                setTimeout(setMatch, 300);
+
+            } else {
+                setTimeout(resetOpen, 700);
+
+            }
+        }
+    }
+};
 function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+    let currentIndex = array.length,
+        temporaryValue, randomIndex;
 
     while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
@@ -25,14 +177,8 @@ function shuffle(array) {
     return array;
 }
 
-
-/*
- * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
- *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
- */
+// Provides a randomized game board on page load
+$(updateCards);
+$(".card").click(onClick);
+$(".restart").click(resetGame);
+$(".play-again").click(playAgain);
