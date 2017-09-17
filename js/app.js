@@ -7,21 +7,22 @@ let cards = ["fa-diamond", "fa-diamond", "fa-paper-plane-o", "fa-paper-plane-o",
 let openCards = [];
 let matchedCards = 0;
 let moveCounter = "";
+let moveCounterforTimer = 0;
 let numStars = 3;
 let timer = {
     seconds: 0,
     minutes: 0,
     clearTime: -1
 };
-
-
 // stars rating
 const hard = 15;
 const medium = 20;
 
 // Model Popup for results
 const modal = $("#win-modal");
-
+ if(moveCounterforTimer>0){
+        resetTimer();
+    }
 // Timer functions
 const startTimer = function () {
     if (timer.seconds === 59) {
@@ -96,7 +97,8 @@ function updateCards() {
         $(this).attr("class", "fa " + cards[index]);
         index++;
     });
-    resetTimer();
+  
+    
 }
 // Removes last start from remaining stars, updates modal HTML
 function removeStar() {
@@ -143,6 +145,10 @@ function checkMatch() {
 }
 // On click function
 const onClick = function () {
+    moveCounterforTimer++;
+    if(moveCounterforTimer===1){
+        resetTimer();
+    }
     if (isValidCard($(this))) {
         if (openCards.length === 0) {
             openCard($(this));

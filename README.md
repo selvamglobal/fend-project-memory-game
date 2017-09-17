@@ -8,14 +8,14 @@ Download the project and run the files through local server.
 The game starts automatically upon page load. Click the cards to reveal them. The goal is to reveal cards two at a time to match the pairs. The game ends when all pairs are revealed.
 
 ## Restarting the game
-Click the restting icon to restart the game.
+Click the resetting icon to restart the game.
 
 ## To Win
 You have to match all the cards, in order to win.
 Good luck!
 
 ## Project Dependencies
-This project biuld with Jquery and bootstrap.
+This project biult with Jquery and bootstrap.
 - ![Jquery](https://jquery.com/)
 - ![Bootstrap](http://getbootstrap.com/)
 
